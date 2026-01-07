@@ -124,7 +124,7 @@ class LinkedInScraper(Scraper):
         query_string = urlencode(params)
         full_url = f"{self.base_url}/jobs-guest/jobs/api/seeMoreJobPostings/search?{query_string}"
         try:
-            self.logger.debug(f"Getting Linkedin URL: {full_url}")
+            self.logger.info(f"Getting Linkedin URL: {full_url}")
 
             response = self.session.get(
                 f"{self.base_url}/jobs-guest/jobs/api/seeMoreJobPostings/search",
@@ -149,8 +149,11 @@ class LinkedInScraper(Scraper):
             return None
 
     def _build_search_params(self, start: int, seconds_old: int | None) -> dict[str, Any]:
+
         if not self.scraper_input:
             return {}
+
+        self.logger.info(f"Building search params with easy_apply={self.scraper_input.easy_apply}")
         params: dict[str, Any] = {
             "keywords": self.scraper_input.search_term,
             "location": self.scraper_input.location,
@@ -173,7 +176,10 @@ class LinkedInScraper(Scraper):
         }
         if seconds_old is not None:
             params["f_TPR"] = f"r{seconds_old}"
-        return {k: v for k, v in params.items() if v is not None}
+        filtered_params = {k: v for k, v in params.items() if v is not None}
+        self.logger.info(f"Search params f_AL value: {filtered_params.get('f_AL', 'Not present')}")
+        return filtered_params
+
 
     def _get_job_cards(self, response: requests.Response) -> list[Tag]:
         soup = BeautifulSoup(response.text, "html.parser")

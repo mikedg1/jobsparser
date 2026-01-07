@@ -50,6 +50,7 @@ def _scrape_single_site(
     batch_size: int,
     sleep_time: int,
     max_retries: int,
+    easy_apply: bool,
 ):
     """Scrapes jobs for a single site with retries, batching, and sleep."""
     offset = 0
@@ -75,7 +76,8 @@ def _scrape_single_site(
                     proxies=proxies,
                     hours_old=hours_old,
                     linkedin_experience_levels=linkedin_experience_levels,
-                    logger=logger # Pass the parent logger for jobspy to use
+                    logger=logger, # Pass the parent logger for jobspy to use
+                    easy_apply=easy_apply
                 )
                 if jobs_df_scraped is None or jobs_df_scraped.empty:
                     new_jobs = []
@@ -137,11 +139,12 @@ def _scrape_single_site(
 @click.option('--sleep-time', default=100, help='Base sleep time between batches in seconds')
 @click.option('--max-retries', default=3, help='Maximum retry attempts per batch')
 @click.option('--hours-old', default=None, type=int, help='Hours old for job search')
+@click.option('--easy-apply', default=None, type=bool, help='Easy apply filter')
 @click.option('--output-dir', default='data', help='Directory to save output CSV')
 @click.option('--linkedin-experience-level', multiple=True, type=click.Choice([level.value for level in LinkedInExperienceLevel]), default=None, help='Experience levels for LinkedIn')
 @click.option('-v', '--verbose', count=True, help="Verbosity: -v for DEBUG, default INFO for this script's logs.", default=0)
 def main(search_term, location, site, results_wanted, distance, job_type, indeed_country,
-         fetch_description, proxies, batch_size, sleep_time, max_retries, hours_old, output_dir, linkedin_experience_level, verbose):
+         fetch_description, proxies, batch_size, sleep_time, max_retries, hours_old, easy_apply, output_dir, linkedin_experience_level, verbose):
     """Scrape jobs from various job sites with customizable parameters."""
     
     # Determine overall log level for this script's loggers
@@ -227,6 +230,7 @@ def main(search_term, location, site, results_wanted, distance, job_type, indeed
                     batch_size=batch_size,
                     sleep_time=sleep_time,
                     max_retries=max_retries,
+                    easy_apply=easy_apply,
                 )
                 future_to_site_logger_map[future] = site_logger
 
