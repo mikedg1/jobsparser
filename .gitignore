@@ -36,3 +36,4 @@ data/
 *.csv
 .env
 **my_jobs
+.DS_Store
